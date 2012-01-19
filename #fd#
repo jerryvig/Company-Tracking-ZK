@@ -1,0 +1,10 @@
+CREATE TABLE geocode_addresses ( ticker_symbol VARCHAR(10), street_address VARCHAR(1024), city VARCHAR(128), state VARCHAR(64), zip_code VARCHAR(64) );
+
+CREATE INDEX geocode_addresses_ticker_idx ON geocode_addresses ( ticker_symbol );
+CREATE INDEX geocode_addresses_state_idx ON geocode_addresses ( state );
+
+CREATE INDEX geocode_addresses_city_idx ON geocode_addresses ( city );
+
+CREATE INDEX geocode_addresses_zip_idx ON geocode_addresses ( zip_code );
+
+
