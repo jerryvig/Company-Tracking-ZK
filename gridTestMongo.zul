@@ -1,4 +1,4 @@
-<window title="GridTest" border="normal" width="100%">
+<window title="GridTestMongo" border="normal" width="100%">
 <div style="font-weight:bold;">
 <grid> 
   <auxhead>
@@ -26,71 +26,75 @@
 </div>
 <zscript language="Java">
  <![CDATA[
-  import java.sql.Connection;
-  import java.sql.DriverManager;
-  import java.sql.Statement;
-  import java.sql.ResultSet;
-  import java.sql.CallableStatement;
+  import com.mongodb.Mongo;
+  import com.mongodb.DB;
+  import com.mongodb.DBCollection;
+  import com.mongodb.DBCursor;
+  import com.mongodb.DBObject;
   import java.text.DecimalFormat;
 
-  Class.forName("oracle.jdbc.OracleDriver");
-  Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@//localhost", "morningstar", "uptime5");
-  Statement stmt = conn.createStatement();
-
-  CallableStatement callStmt = conn.prepareCall( "{call fill_morningstar_rev_fact_tbl()}" );
-  callStmt.executeUpdate();
+  Mongo mong = new Mongo( "localhost" );
+  DB db = mong.getDB("morningstar");
+  DBCollection msRevFacts = db.getCollection("morningstar_rev_facts");
+  DBCursor cur = msRevFacts.find().limit(20);
 
   DecimalFormat integerFormatter = new DecimalFormat("#,###");
   DecimalFormat pctFormatter = new DecimalFormat("#,###.00%");
   DecimalFormat doubleFormatter = new DecimalFormat("#,###.##");
 
-  ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, street_address, city, state, zip_code, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees, salary_average, salary_range FROM morningstar_rev_fact_table ORDER BY avg_revenue_growth DESC) WHERE revenue_growth_ttm>=.5");
+  // ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, street_address, city, state, zip_code, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees, salary_average, salary_range FROM morningstar_rev_fact_table ORDER BY avg_revenue_growth DESC) WHERE revenue_growth_ttm>=.5");
 
-  while ( rs.next() ) {
+  while ( cur.hasNext() ) {
+    DBObject doc = cur.next();
     Row myRow = new Row();
-    Label tickerLbl = new Label( rs.getString(1) );
+    Label tickerLbl = new Label( doc.get("ticker_symbol") );
     tickerLbl.setStyle("font-weight:bold;");
 
-    Label companyLbl = new Label( rs.getString(2) );
+    Label companyLbl = new Label( doc.get("companyName") );
     companyLbl.setStyle("font-weight:bold;");
 
-    Label stAddressLbl = new Label( rs.getString(3) );
+    Label stAddressLbl = new Label( doc.get("streetAddress") );
     stAddressLbl.setStyle("font-weight:bold;");
 
-    Label cityLbl = new Label( rs.getString(4) );
+    Label cityLbl = new Label( doc.get("city") );
     cityLbl.setStyle("font-weight:bold;");
 
-    Label stateLbl = new Label( rs.getString(5) );
+    Label stateLbl = new Label( doc.get("state") );
     stateLbl.setStyle("font-weight:bold;");
 
-    Label zipLbl = new Label( rs.getString(6) );
+    Label zipLbl = new Label( doc.get("zipCode").toString() );
     zipLbl.setStyle("font-weight:bold;");
 
-    Label sectorLbl = new Label( rs.getString(7) );
+    Label sectorLbl = new Label( doc.get("sector") );
     sectorLbl.setStyle("font-weight:bold;");
 
-    Label industryLbl = new Label( rs.getString(8) );
+    Label industryLbl = new Label( doc.get("industry") );
     industryLbl.setStyle("font-weight:bold;");
-
-    Label ttmLbl = new Label( integerFormatter.format(rs.getLong(9)) );
+    
+    Label ttmLbl = new Label();
+    try { ttmLbl = new Label( integerFormatter.format(doc.get("revTTM")) ); } catch ( Exception e ) {}
     ttmLbl.setStyle("font-weight:bold;");
 
-    Label ttmGrLbl = new Label( pctFormatter.format(rs.getDouble(10)) );
+    Label ttmGrLbl = new Label();
+    try { ttmGrLbl = new Label(  pctFormatter.format( doc.get("revGrowthTTM") ) ); } catch ( Exception e ) {}
     ttmGrLbl.setStyle("font-weight:bold;");
 
-    Label avgLbl = new Label( pctFormatter.format(rs.getDouble(11)) );
+    Label avgLbl = new Label();
+    try { avgLbl = new Label( pctFormatter.format( doc.get("avgRevGrowth") ) ); } catch ( Exception e ) {}
     avgLbl.setStyle("font-weight:bold;");
 
-    Label sharpeLbl = new Label( doubleFormatter.format(rs.getDouble(12)) );
+    Label sharpeLbl = new Label();
+    try { sharpeLbl = new Label( doubleFormatter.format( doc.get("sharpeRevGrowth") ) ); } catch ( Exception e ) {}
     sharpeLbl.setStyle("font-weight:bold;");
 
-    Label fullTimeEmpLbl = new Label( integerFormatter.format(rs.getInt(13)) );
+    Label fullTimeEmpLbl = new Label();
+    try { fullTimeEmpLbl = new Label( integerFormatter.format(doc.get("fullTimeEmployees")) ); } catch ( Exception e ) {}
     fullTimeEmpLbl.setStyle("font-weight:bold;");
 
-    Label salaryAvgLbl = new Label( doubleFormatter.format(rs.getDouble(14)) );
+    Label salaryAvgLbl = new Label( doubleFormatter.format( 60000.0 ) );
     salaryAvgLbl.setStyle("font-weight:bold;");
 
-    Label salaryRangeLbl = new Label( rs.getString(15) );
+    Label salaryRangeLbl = new Label( "Some String" );
     salaryRangeLbl.setStyle("font-weight:bold;");
 
     myRow.appendChild( tickerLbl );
@@ -110,9 +114,7 @@
     myRow.appendChild( salaryRangeLbl );
     tableRows.appendChild( myRow ); 
   }
-
-  rs.close();
-  conn.close();
+  mong.close();
  ]]>
 </zscript>
 </window>

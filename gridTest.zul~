@@ -4,10 +4,13 @@
   <auxhead>
    <auxheader colspan="1" label="Morningstar Revenue Data"/>
   </auxhead>
-  <columns id="gridColumns">
+  <columns id="gridColumns" sizable="true">
     <column><label value="Ticker Symbol" style="font-weight:bold;"/></column>
     <column><label value="Company Name" style="font-weight:bold;"/></column>
-    <column><label value="Address" style="font-weight:bold;"/></column>
+    <column><label value="Street Address" style="font-weight:bold;"/></column>
+    <column><label value="City" style="font-weight:bold;"/></column>
+    <column><label value="State" style="font-weight:bold;"/></column>
+    <column><label value="Zip" style="font-weight:bold;"/></column>
     <column><label value="Sector" style="font-weight:bold;"/></column>
     <column><label value="Industry" style="font-weight:bold;"/></column>
     <column align="right"><label value="TTM Revenue" style="font-weight:bold;"/></column>
@@ -15,6 +18,8 @@
     <column align="right"><label value="Avg Revenue Growth" style="font-weight:bold;"/></column>
     <column align="right"><label value="Sharpe Revenue Growth" style="font-weight:bold;"/></column>
     <column align="right"><label value="Full Time Employees" style="font-weight:bold;"/></column>
+    <column align="right"><label value="Salary Average" style="font-weight:bold;"/></column>
+    <column align="right"><label value="Salary Range" style="font-weight:bold;"/></column>
   </columns>
   <rows id="tableRows"></rows>
 </grid>
@@ -39,33 +44,61 @@
   DecimalFormat pctFormatter = new DecimalFormat("#,###.00%");
   DecimalFormat doubleFormatter = new DecimalFormat("#,###.##");
 
-  ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, address, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees FROM morningstar_rev_fact_table ORDER BY avg_revenue_growth DESC) WHERE avg_revenue_growth>=0.15");
+  ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, street_address, city, state, zip_code, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees, salary_average, salary_range FROM morningstar_rev_fact_table ORDER BY avg_revenue_growth DESC) WHERE revenue_growth_ttm>=.5 AND revenue_growth_ttm<=1.0");
 
   while ( rs.next() ) {
     Row myRow = new Row();
     Label tickerLbl = new Label( rs.getString(1) );
     tickerLbl.setStyle("font-weight:bold;");
+
     Label companyLbl = new Label( rs.getString(2) );
     companyLbl.setStyle("font-weight:bold;");
-    Label addressLbl = new Label( rs.getString(3) );
-    addressLbl.setStyle("font-weight:bold;");
-    Label sectorLbl = new Label( rs.getString(4) );
+
+    Label stAddressLbl = new Label( rs.getString(3) );
+    stAddressLbl.setStyle("font-weight:bold;");
+
+    Label cityLbl = new Label( rs.getString(4) );
+    cityLbl.setStyle("font-weight:bold;");
+
+    Label stateLbl = new Label( rs.getString(5) );
+    stateLbl.setStyle("font-weight:bold;");
+
+    Label zipLbl = new Label( rs.getString(6) );
+    zipLbl.setStyle("font-weight:bold;");
+
+    Label sectorLbl = new Label( rs.getString(7) );
     sectorLbl.setStyle("font-weight:bold;");
-    Label industryLbl = new Label( rs.getString(5) );
+
+    Label industryLbl = new Label( rs.getString(8) );
     industryLbl.setStyle("font-weight:bold;");
-    Label ttmLbl = new Label( integerFormatter.format(rs.getLong(6)) );
+
+    Label ttmLbl = new Label( integerFormatter.format(rs.getLong(9)) );
     ttmLbl.setStyle("font-weight:bold;");
-    Label ttmGrLbl = new Label( pctFormatter.format(rs.getDouble(7)) );
+
+    Label ttmGrLbl = new Label( pctFormatter.format(rs.getDouble(10)) );
     ttmGrLbl.setStyle("font-weight:bold;");
-    Label avgLbl = new Label( pctFormatter.format(rs.getDouble(8)) );
+
+    Label avgLbl = new Label( pctFormatter.format(rs.getDouble(11)) );
     avgLbl.setStyle("font-weight:bold;");
-    Label sharpeLbl = new Label( doubleFormatter.format(rs.getDouble(9)) );
+
+    Label sharpeLbl = new Label( doubleFormatter.format(rs.getDouble(12)) );
     sharpeLbl.setStyle("font-weight:bold;");
-    Label fullTimeEmpLbl = new Label( integerFormatter.format(rs.getInt(10)) );
+
+    Label fullTimeEmpLbl = new Label( integerFormatter.format(rs.getInt(13)) );
     fullTimeEmpLbl.setStyle("font-weight:bold;");
+
+    Label salaryAvgLbl = new Label( doubleFormatter.format(rs.getDouble(14)) );
+    salaryAvgLbl.setStyle("font-weight:bold;");
+
+    Label salaryRangeLbl = new Label( rs.getString(15) );
+    salaryRangeLbl.setStyle("font-weight:bold;");
+
     myRow.appendChild( tickerLbl );
     myRow.appendChild( companyLbl );
-    myRow.appendChild( addressLbl );
+    myRow.appendChild( stAddressLbl );
+    myRow.appendChild( cityLbl );
+    myRow.appendChild( stateLbl );
+    myRow.appendChild( zipLbl );
     myRow.appendChild( sectorLbl );
     myRow.appendChild( industryLbl );
     myRow.appendChild( ttmLbl );
@@ -73,6 +106,8 @@
     myRow.appendChild( avgLbl );
     myRow.appendChild( sharpeLbl );
     myRow.appendChild( fullTimeEmpLbl );
+    myRow.appendChild( salaryAvgLbl );
+    myRow.appendChild( salaryRangeLbl );
     tableRows.appendChild( myRow ); 
   }
 
