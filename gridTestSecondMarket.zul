@@ -131,8 +131,12 @@
     lblList.add( companyA )
     lblList.add( new Label( dateFormatter.format(it.last_funding_date) ) )
     lblList.add( new Label( integerFormatter.format(it.last_funding_amount) ) )
-    lblList.add( new Label( integerFormatter.format(it.unique_visitors) ) )
-    lblList.add( new Label( pctFormatter.format(it.visitor_growth) ) )
+    if ( it.unique_visitors != null ) {
+      lblList.add( new Label( integerFormatter.format(it.unique_visitors) ) )
+    } else { lblList.add( new Label() ) }
+    if ( it.visitor_growth != null ) {
+      lblList.add( new Label( pctFormatter.format(it.visitor_growth) ) )
+    }  else { lblList.add( new Label() ) }
 
     lblList.each { lbl ->
       lbl.setStyle("font-weight:bold;")
