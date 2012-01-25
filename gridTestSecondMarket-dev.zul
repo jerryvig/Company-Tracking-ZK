@@ -66,7 +66,7 @@
         gridColumns.appendChild( col );
       }
       else if ( columnName.equals("SECOND_MARKET_URL") ) {
-        Label colLabel = new Label( "Second Market URL" );
+        Label colLabel = new Label( "SecondMarket URL" );
         colLabel.setStyle("font-weight:bold;");
         Column col = new Column();
         col.appendChild( colLabel );
@@ -215,55 +215,53 @@
 <vbox width="100%" heights="150px,*">
 <tabbox id="myTabBox">
  <tabs id="myTabs">
-   <tab id="guiTab" label="Query Builder"/>
-   <tab id="sqlTab" label="SQL"/>
+   <tab id="guiTab" label="Query Builder" style="font-weight:bold;"/>
+   <tab id="sqlTab" label="SQL" style="font-weight:bold;"/>
  </tabs> 
  <tabpanels>
-  <tabpanel id="guiPanel">
-   <label value="GUI panel goes here."/>
-  </tabpanel>
+  <tabpanel id="guiPanel"></tabpanel>
   <tabpanel id="sqlPanel">
    <hlayout>
     <listbox id="columnListBox" width="400px">
-     <listhead>
-       <listheader label="Column"/>
-       <listheader label="Description"/>
+     <listhead sizable="true">
+       <listheader label="Column" sort="auto"/>
+       <listheader label="Description" sort="auto"/>
      </listhead>
      <listitem>
-       <listcell label="COMPANY_NAME"/>
-       <listcell label="Name of Company"/>
+       <listcell label="COMPANY_NAME" style="font-weight:bold;"/>
+       <listcell label="Name of Company" style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="CITY"/>
-       <listcell label="City of company's headquarters."/>
+       <listcell label="CITY" style="font-weight:bold;"/>
+       <listcell label="City of company's headquarters." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="STATE"/>
-       <listcell label="State where company's headquarters is located."/>
+       <listcell label="STATE" style="font-weight:bold;"/>
+       <listcell label="State where company's headquarters is located." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="SECOND_MARKET_URL"/>
-       <listcell label="URL of company's SecondMarket profile if available."/>
+       <listcell label="SECOND_MARKET_URL" style="font-weight:bold;"/>
+       <listcell label="URL of company's SecondMarket profile if available." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="COMPANY_URL"/>
-       <listcell label="URL of company's homepage."/>
+       <listcell label="COMPANY_URL" style="font-weight:bold;"/>
+       <listcell label="URL of company's homepage." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="LAST_FUNDING_DATE"/>
-       <listcell label="Month &amp; Year of company's last VC fundraiser."/>
+       <listcell label="LAST_FUNDING_DATE" style="font-weight:bold;"/>
+       <listcell label="Month &amp; Year of company's last VC fundraiser." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="LAST_FUNDING_AMOUNT"/>
-       <listcell label="Dollar amount raised company's last funding."/>
+       <listcell label="LAST_FUNDING_AMOUNT" style="font-weight:bold;"/>
+       <listcell label="Dollar amount raised company's last funding." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="UNIQUE_VISITORS"/>
-       <listcell label="Last count of monthly unique website visitors."/>
+       <listcell label="UNIQUE_VISITORS" style="font-weight:bold;"/>
+       <listcell label="Last count of monthly unique website visitors." style="font-weight:bold;"/>
      </listitem>
      <listitem>
-       <listcell label="VISITOR_GROWTH"/>
-       <listcell label="Annual Web traffic growth as measured by unique visitor count."/>
+       <listcell label="VISITOR_GROWTH" style="font-weight:bold;"/>
+       <listcell label="Annual Web traffic growth as measured by unique visitor count." style="font-weight:bold;"/>
      </listitem>
     </listbox>
     <vlayout>
@@ -288,7 +286,7 @@
     <column sort="auto"><label value="Company Name" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="City" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="State" style="font-weight:bold;"/></column>
-    <column><label value="Second Market URL" style="font-weight:bold;"/></column>
+    <column><label value="SecondMarket URL" style="font-weight:bold;"/></column>
     <column><label value="Company URL" style="font-weight:bold;"/></column>
     <column align="right" sort="auto"><label value="Last Funding Date" style="font-weight:bold;"/></column>
     <column sort="auto" align="right"><label value="Last Funding Amount" style="font-weight:bold;"/></column>
@@ -304,6 +302,59 @@
   import groovy.sql.Sql
   import java.text.DecimalFormat
   import java.text.SimpleDateFormat
+
+  def guiGrid = new Grid();
+  def guiColumns = new Columns();
+  def checkboxCol = new Column( "In Results?" );
+  checkboxCol.setAlign("right");
+  def columnCol = new Column( "Column" );
+  def operatorCol = new Column( "Operator" );
+  operatorCol.setAlign("center");
+  def valueCol = new Column( "Value" );
+  guiColumns.appendChild( checkboxCol );
+  guiColumns.appendChild( columnCol );
+  guiColumns.appendChild( operatorCol );
+  guiColumns.appendChild( valueCol );
+  guiColumns.setSizable( true );
+  guiGrid.appendChild( guiColumns );
+
+  def guiRows = new Rows();
+  def columnNames = [ "Company Name", "City", "State", "Second Market URL", "Company URL", "Last Funding Date", "Last Funding Amount", "Unique Web Visitors", "Web Visitor Growth" ];
+
+  columnNames.each {
+    def columnRow = new Row();
+    def cBox = new Checkbox();
+    cBox.setChecked( true );
+    columnRow.appendChild( cBox );
+    def lbl = new Label( it );
+    lbl.setStyle("font-weight:bold;");
+    columnRow.appendChild( lbl );
+    def ops = new Listbox();
+    ops.setMold( "select" );
+    ops.appendItem("=", "eq");
+    ops.appendItem(">","gt");
+    ops.appendItem(">=","gte");
+    ops.appendItem( "<", "lt");
+    ops.appendItem( "<=", "lte");
+    ops.appendItem( "!=", "ne" );
+    ops.appendItem( "LIKE", "like" );
+    ops.appendItem( "NOT LIKE", "nlike" );
+    ops.appendItem( "IN", "in" );
+    ops.appendItem( "NOT IN", "nin" );
+    ops.appendItem( "BETWEEN", "bet" );
+    ops.appendItem( "IS NULL", "isnull" );
+    ops.appendItem( "IS NOT NULL", "isnotnull" );
+    columnRow.appendChild( ops );
+    def valuesTextbox = new Textbox();
+    valuesTextbox.setCols(25);
+  // you are here.
+    columnRow.appendChild( valuesTextbox );
+    guiRows.appendChild( columnRow );
+  }
+  
+  guiGrid.appendChild( guiRows );
+
+  guiPanel.appendChild( guiGrid );
 
   def sql = Sql.newInstance("jdbc:oracle:thin:morningstar/uptime5@localhost:1521:XE","morningstar","uptime5","oracle.jdbc.OracleDriver")
   
