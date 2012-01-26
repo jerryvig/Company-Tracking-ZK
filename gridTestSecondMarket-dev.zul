@@ -351,7 +351,17 @@
     columnRow.appendChild( valuesTextbox );
     guiRows.appendChild( columnRow );
   }
-  
+
+  def buttonRow = new Row();
+  def buttonCell = new Cell();
+  buttonCell.setColspan(4);
+  buttonCell.setAlign("center");
+  def submitButton = new Button("Run Query");
+  submitButton.setStyle("font-weight:bold;");
+  buttonCell.appendChild( submitButton );
+  buttonRow.appendChild( buttonCell );
+  guiRows.appendChild( buttonRow );
+ 
   guiGrid.appendChild( guiRows );
 
   guiPanel.appendChild( guiGrid );
