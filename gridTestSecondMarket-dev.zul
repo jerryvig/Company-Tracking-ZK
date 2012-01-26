@@ -311,10 +311,14 @@
   def operatorCol = new Column( "Operator" );
   operatorCol.setAlign("center");
   def valueCol = new Column( "Value" );
+  def sortCol = new Column( "Sort" );
+  def sortLevelCol = new Column( "Sort Level" );
   guiColumns.appendChild( checkboxCol );
   guiColumns.appendChild( columnCol );
   guiColumns.appendChild( operatorCol );
   guiColumns.appendChild( valueCol );
+  guiColumns.appendChild( sortCol );
+  guiColumns.appendChild( sortLevelCol );
   guiColumns.setSizable( true );
   guiGrid.appendChild( guiColumns );
 
@@ -347,14 +351,27 @@
     columnRow.appendChild( ops );
     def valuesTextbox = new Textbox();
     valuesTextbox.setCols(25);
-  // you are here.
     columnRow.appendChild( valuesTextbox );
+    def sortOps = new Listbox();
+    sortOps.setMold("select");
+    sortOps.appendItem("None","None");
+    sortOps.appendItem("Ascending","ASC");
+    sortOps.appendItem("Descending","DESC");
+    columnRow.appendChild( sortOps );
+
+    def sortLevelOps = new Listbox();
+    sortLevelOps.setMold("select");
+    for ( i in 1..3 ) {
+      sortLevelOps.appendItem(Integer.toString(i),Integer.toString(i));
+    }
+    columnRow.appendChild( sortLevelOps );
+
     guiRows.appendChild( columnRow );
   }
 
   def buttonRow = new Row();
   def buttonCell = new Cell();
-  buttonCell.setColspan(4);
+  buttonCell.setColspan(6);
   buttonCell.setAlign("center");
   def submitButton = new Button("Run Query");
   submitButton.setStyle("font-weight:bold;");
