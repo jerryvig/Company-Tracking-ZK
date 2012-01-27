@@ -5,6 +5,8 @@
    import java.sql.Statement;
    import java.sql.DriverManager;
    import java.sql.ResultSet; 
+   import java.sql.SQLException;
+   import java.sql.ResultSetMetaData;
    import java.text.DecimalFormat;
    import java.text.SimpleDateFormat;
    import java.util.ArrayList;
@@ -19,12 +21,163 @@
 
    public void doClick() {
     query = sqlTextBox.getValue().trim();
-    ResultSet rs = stmt.executeQuery( query );
+    ResultSet rs = null;
+    try {
+      rs = stmt.executeQuery( query );
+    } catch ( SQLException sqle ) {
+      alert( "INVALID SQL QUERY: Please check your sql and try again.\n\nError Message:" + sqle.getMessage() );
+      return;
+    }
+
+    ResultSetMetaData metaData = rs.getMetaData();
+    int columnCount = metaData.getColumnCount();
+    
+    while ( gridColumns.getFirstChild() != null ) {
+      gridColumns.removeChild( gridColumns.getFirstChild() );
+    }
+
+    ArrayList colNames = new ArrayList();
+
+    for ( int i=1; i<=columnCount; i++ ) {
+      String columnName = metaData.getColumnName(i);
+      colNames.add( columnName );
+      if ( columnName.equals("COMPANY_NAME") ) {
+        Label colLabel = new Label( "Company Name" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort( "auto" );
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("CITY") ) {
+        Label colLabel = new Label( "City" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort( "auto" );
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("STATE") ) {
+        Label colLabel = new Label( "State" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort( "auto" );
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("SECOND_MARKET_URL") ) {
+        Label colLabel = new Label( "SecondMarket URL" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("COMPANY_URL") ) {
+        Label colLabel = new Label( "Company URL" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("LAST_FUNDING_DATE") ) {
+        Label colLabel = new Label( "Last Funding Date" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort("auto");
+        col.setAlign("right");
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("LAST_FUNDING_AMOUNT") ) {
+        Label colLabel = new Label( "Last Funding Amount" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort("auto");
+        col.setAlign("right");
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("UNIQUE_VISITORS") ) {
+        Label colLabel = new Label( "Unique Web Visitors" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort("auto");
+        col.setAlign("right");
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+      else if ( columnName.equals("VISITOR_GROWTH") ) {
+        Label colLabel = new Label( "Web Visitor Growth" );
+        colLabel.setStyle("font-weight:bold;");
+        Column col = new Column();
+        col.setSort("auto");
+        col.setAlign("right");
+        col.appendChild( colLabel );
+        gridColumns.appendChild( col );
+      }
+    }
 
     while ( tableRows.getFirstChild() != null ) {
       tableRows.removeChild( tableRows.getFirstChild() );
     }
 
+    while ( rs.next() ) {
+     Row myRow = new Row();
+     for ( String colName : colNames ) {
+       if ( colName.equals("COMPANY_NAME") ) {
+         Label lbl = new Label( rs.getString( colName ) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       } 
+       else if ( colName.equals("CITY") ) {
+         Label lbl = new Label( rs.getString( colName ) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       }
+       else if ( colName.equals("STATE") ) {
+         Label lbl = new Label( rs.getString( colName ) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       }
+       else if ( colName.equals("SECOND_MARKET_URL") ) {
+         A a = new A( rs.getString( colName ) );
+         a.setStyle("font-weight:bold;");
+         a.setHref( rs.getString( colName ) );
+         a.setTarget( "_blank" );
+         myRow.appendChild( a );
+       }
+       else if ( colName.equals("COMPANY_URL") ) {
+         A a = new A( rs.getString( colName ) );
+         a.setStyle("font-weight:bold;");
+         a.setHref( rs.getString( colName ) );
+         a.setTarget( "_blank" );
+         myRow.appendChild( a );
+       }
+       else if ( colName.equals("LAST_FUNDING_DATE") ) {
+         Label lbl = new Label( dateFmt.format(rs.getDate( colName )) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       }
+       else if ( colName.equals("LAST_FUNDING_AMOUNT") ) {
+         Label lbl = new Label( iFmt.format(rs.getInt( colName )) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       }
+       else if ( colName.equals("UNIQUE_VISITORS") ) {
+         Label lbl = new Label( iFmt.format(rs.getInt( colName )) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       } 
+       else if ( colName.equals("VISITOR_GROWTH") ) {
+         Label lbl = new Label( pctFmt.format(rs.getInt( colName )) );
+         lbl.setStyle("font-weight:bold;");
+         myRow.appendChild( lbl );
+       }
+     }
+     tableRows.appendChild( myRow );
+    }
+
+    /*
     while ( rs.next() ) {
       Row myRow = new Row();
       ArrayList lblList = new ArrayList();
@@ -53,7 +206,8 @@
       myRow.appendChild( new Label( pctFmt.format( rs.getDouble(11) ) ) );
 
       tableRows.appendChild( myRow );
-    }
+    } */
+
     rs.close();
    }
  ]]>
@@ -61,22 +215,64 @@
 <vbox width="100%" heights="150px,*">
 <tabbox id="myTabBox">
  <tabs id="myTabs">
-   <tab id="guiTab" label="Query Builder"/>
-   <tab id="sqlTab" label="SQL"/>
+   <tab id="guiTab" label="Query Builder" style="font-weight:bold;"/>
+   <tab id="sqlTab" label="SQL" style="font-weight:bold;"/>
  </tabs> 
  <tabpanels>
-  <tabpanel id="guiPanel">
-   <label value="GUI panel goes here."/>
-  </tabpanel>
+  <tabpanel id="guiPanel"></tabpanel>
   <tabpanel id="sqlPanel">
-   <vlayout>
-     <textbox id="sqlTextBox" rows="5" width="97%">
+   <hlayout>
+    <listbox id="columnListBox" width="400px">
+     <listhead sizable="true">
+       <listheader label="Column" sort="auto"/>
+       <listheader label="Description" sort="auto"/>
+     </listhead>
+     <listitem>
+       <listcell label="COMPANY_NAME" style="font-weight:bold;"/>
+       <listcell label="Name of Company" style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="CITY" style="font-weight:bold;"/>
+       <listcell label="City of company's headquarters." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="STATE" style="font-weight:bold;"/>
+       <listcell label="State where company's headquarters is located." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="SECOND_MARKET_URL" style="font-weight:bold;"/>
+       <listcell label="URL of company's SecondMarket profile if available." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="COMPANY_URL" style="font-weight:bold;"/>
+       <listcell label="URL of company's homepage." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="LAST_FUNDING_DATE" style="font-weight:bold;"/>
+       <listcell label="Month &amp; Year of company's last VC fundraiser." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="LAST_FUNDING_AMOUNT" style="font-weight:bold;"/>
+       <listcell label="Dollar amount raised company's last funding." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="UNIQUE_VISITORS" style="font-weight:bold;"/>
+       <listcell label="Last count of monthly unique website visitors." style="font-weight:bold;"/>
+     </listitem>
+     <listitem>
+       <listcell label="VISITOR_GROWTH" style="font-weight:bold;"/>
+       <listcell label="Annual Web traffic growth as measured by unique visitor count." style="font-weight:bold;"/>
+     </listitem>
+    </listbox>
+    <vlayout>
+     <textbox id="sqlTextBox" rows="6" width="700px">
      </textbox>
      <div align="center">
       <button style="font-weight:bold;" label="Run Query" width="100px" height="30px" onClick="doClick();">
       </button>
      </div>
-   </vlayout>
+    </vlayout>
+   </hlayout>
   </tabpanel>
  </tabpanels>
 </tabbox>
@@ -90,7 +286,7 @@
     <column sort="auto"><label value="Company Name" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="City" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="State" style="font-weight:bold;"/></column>
-    <column><label value="Second Market URL" style="font-weight:bold;"/></column>
+    <column><label value="SecondMarket URL" style="font-weight:bold;"/></column>
     <column><label value="Company URL" style="font-weight:bold;"/></column>
     <column align="right" sort="auto"><label value="Last Funding Date" style="font-weight:bold;"/></column>
     <column sort="auto" align="right"><label value="Last Funding Amount" style="font-weight:bold;"/></column>
@@ -107,13 +303,94 @@
   import java.text.DecimalFormat
   import java.text.SimpleDateFormat
 
+  def guiGrid = new Grid();
+  def guiColumns = new Columns();
+  def checkboxCol = new Column( "In Results?" );
+  checkboxCol.setAlign("right");
+  def columnCol = new Column( "Column" );
+  def operatorCol = new Column( "Operator" );
+  operatorCol.setAlign("center");
+  def valueCol = new Column( "Value" );
+  def sortCol = new Column( "Sort Order" );
+  def sortLevelCol = new Column( "Sort Level" );
+  guiColumns.appendChild( checkboxCol );
+  guiColumns.appendChild( columnCol );
+  guiColumns.appendChild( operatorCol );
+  guiColumns.appendChild( valueCol );
+  guiColumns.appendChild( sortCol );
+  guiColumns.appendChild( sortLevelCol );
+  guiColumns.setSizable( true );
+  guiGrid.appendChild( guiColumns );
+
+  def guiRows = new Rows();
+  def columnNames = [ "Company Name", "City", "State", "Second Market URL", "Company URL", "Last Funding Date", "Last Funding Amount", "Unique Web Visitors", "Web Visitor Growth" ];
+
+  columnNames.each {
+    def columnRow = new Row();
+    def cBox = new Checkbox();
+    cBox.setChecked( true );
+    columnRow.appendChild( cBox );
+    def lbl = new Label( it );
+    lbl.setStyle("font-weight:bold;");
+    columnRow.appendChild( lbl );
+    def ops = new Listbox();
+    ops.setMold( "select" );
+    ops.appendItem("=", "eq");
+    ops.appendItem(">","gt");
+    ops.appendItem(">=","gte");
+    ops.appendItem( "<", "lt");
+    ops.appendItem( "<=", "lte");
+    ops.appendItem( "!=", "ne" );
+    ops.appendItem( "LIKE", "like" );
+    ops.appendItem( "NOT LIKE", "nlike" );
+    ops.appendItem( "IN", "in" );
+    ops.appendItem( "NOT IN", "nin" );
+    ops.appendItem( "BETWEEN", "bet" );
+    ops.appendItem( "IS NULL", "isnull" );
+    ops.appendItem( "IS NOT NULL", "isnotnull" );
+    columnRow.appendChild( ops );
+    def valuesTextbox = new Textbox();
+    valuesTextbox.setCols(25);
+    columnRow.appendChild( valuesTextbox );
+    def sortOps = new Listbox();
+    sortOps.setMold("select");
+    sortOps.appendItem("None","None");
+    sortOps.appendItem("Ascending","ASC");
+    sortOps.appendItem("Descending","DESC");
+    columnRow.appendChild( sortOps );
+
+    def sortLevelOps = new Listbox();
+    sortLevelOps.setMold("select");
+    sortLevelOps.appendItem("None","0");
+    for ( i in 1..3 ) {
+      sortLevelOps.appendItem(Integer.toString(i),Integer.toString(i));
+    }
+    columnRow.appendChild( sortLevelOps );
+
+    guiRows.appendChild( columnRow );
+  }
+
+  def buttonRow = new Row();
+  def buttonCell = new Cell();
+  buttonCell.setColspan(6);
+  buttonCell.setAlign("center");
+  def submitButton = new Button("Run Query");
+  submitButton.setStyle("font-weight:bold;");
+  buttonCell.appendChild( submitButton );
+  buttonRow.appendChild( buttonCell );
+  guiRows.appendChild( buttonRow );
+ 
+  guiGrid.appendChild( guiRows );
+
+  guiPanel.appendChild( guiGrid );
+
   def sql = Sql.newInstance("jdbc:oracle:thin:morningstar/uptime5@localhost:1521:XE","morningstar","uptime5","oracle.jdbc.OracleDriver")
   
   def dateFormatter = new SimpleDateFormat("MMM-yy")
   def integerFormatter = new DecimalFormat("#,###")
   def pctFormatter = new DecimalFormat("#,###.00%")
 
-  def queryString = "SELECT * FROM (SELECT * FROM second_market_fact_table WHERE ( state='CA' ) ORDER BY last_funding_date DESC, last_funding_amount DESC) WHERE rownum<201"
+  def queryString = "SELECT * FROM (SELECT * FROM second_market_fact_table WHERE ( state='CA' ) ORDER BY last_funding_date DESC, last_funding_amount DESC) WHERE rownum<251"
 
   sql.eachRow( queryString ) {
     def myRow = new Row()
