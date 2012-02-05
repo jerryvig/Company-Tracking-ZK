@@ -216,7 +216,7 @@
 <tabbox id="myTabBox">
  <tabs id="myTabs">
    <tab id="guiTab" label="Query Builder" style="font-weight:bold;"/>
-   <tab id="sqlTab" label="SQL" style="font-weight:bold;"/>
+   <tab id="mongoTab" label="MongoDB" style="font-weight:bold;"/>
  </tabs> 
  <tabpanels>
   <tabpanel id="guiPanel"></tabpanel>
@@ -287,7 +287,7 @@
  <div style="font-weight:bold;">
  <grid> 
   <auxhead>
-   <auxheader colspan="1" label="Venture Capital Data"/>
+   <auxheader colspan="1" label="SecondMarket Fundraising Data"/>
   </auxhead>
   <columns id="gridColumns" sizable="true">
     <column sort="auto"><label value="Company Name" style="font-weight:bold;"/></column>
@@ -305,30 +305,21 @@
  </div>
  </tabpanel>
  <tabpanel>
-  <grid>
-   <auxhead>
-     <auxheader colspan="1" label="IPOs Data"/>
-   </auxhead> 
-   <columns id="ipoColumns" sizable="true">
-    <column sort="auto"><label value="Type" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Company Name" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Ticker Symbol" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Market" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Price" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Shares" style="font-weight:bold;"/></column>
-    <column sort="auto"><label value="Date Priced" style="font-weight:bold;"/></column>
-   </columns>
-   <rows id="ipoRows"/>
-  </grid> 
+   <label value="IPOs grid goes here."/>
  </tabpanel>
  </tabpanels>
 </tabbox>
 </vbox>
 <zscript language="Groovy">
  <![CDATA[
-  import groovy.sql.Sql
-  import java.text.DecimalFormat
-  import java.text.SimpleDateFormat
+  import com.mongodb.Mongo;
+  import com.mongodb.DB;
+  import com.mongodb.DBCollection;
+  import com.mongodb.BasicDBObject;
+  import com.mongodb.DBObject;
+  import com.mongodb.DBCursor;
+  import java.text.DecimalFormat;
+  import java.text.SimpleDateFormat; 
 
   def guiGrid = new Grid();
   def guiColumns = new Columns();
@@ -384,6 +375,7 @@
     sortOps.appendItem("None","None");
     sortOps.appendItem("Ascending","ASC");
     sortOps.appendItem("Descending","DESC");
+    
     columnRow.appendChild( sortOps );
 
     def sortLevelOps = new Listbox();
@@ -411,15 +403,20 @@
 
   guiPanel.appendChild( guiGrid );
 
-  def sql = Sql.newInstance("jdbc:oracle:thin:morningstar/uptime5@localhost:1521:XE","morningstar","uptime5","oracle.jdbc.OracleDriver")
-  
+  def mongo = new Mongo("localhost");
+  def db = mongo.getDB("morningstar"); 
+  def secondMktCollection = db.getCollection("second_market_fact_coll");
+  def sortObject = new BasicDBObject("last_funding_date",-1);
+  sortObject.put("last_funding_amount",-1);  
+  def cur = secondMktCollection.find(new BasicDBObject("state","CA")).sort( sortObject ).limit(200);
+
   def dateFormatter = new SimpleDateFormat("MMM-yy")
   def integerFormatter = new DecimalFormat("#,###")
   def pctFormatter = new DecimalFormat("#,###.00%")
 
-  def queryString = "SELECT * FROM (SELECT * FROM second_market_fact_table WHERE ( state='CA' ) ORDER BY last_funding_date DESC, last_funding_amount DESC) WHERE rownum<251"
+  // def queryString = "SELECT * FROM (SELECT * FROM second_market_fact_table WHERE ( state='CA' ) ORDER BY last_funding_date DESC, last_funding_amount DESC) WHERE rownum<251"
 
-  sql.eachRow( queryString ) {
+  cur.each {
     def myRow = new Row()
     def lblList = []
     lblList.add( new Label( it.company_name ) )
@@ -433,12 +430,12 @@
     companyA.setHref(it.company_url)
     companyA.setTarget("_blank")
     lblList.add( companyA )
-    lblList.add( new Label( dateFormatter.format(it.last_funding_date) ) )
+    lblList.add( new Label( dateFormatter.format(it.last_funding_date )) )
     lblList.add( new Label( integerFormatter.format(it.last_funding_amount) ) )
-    if ( it.unique_visitors != null ) {
+    if ( it.unique_visitors != null && !it.unique_visitors.toString().equals("") ) {
       lblList.add( new Label( integerFormatter.format(it.unique_visitors) ) )
     } else { lblList.add( new Label() ) }
-    if ( it.visitor_growth != null ) {
+    if ( it.visitor_growth != null && !it.unique_visitors.toString().equals("") ) {
       lblList.add( new Label( pctFormatter.format(it.visitor_growth) ) )
     }  else { lblList.add( new Label() ) }
 
@@ -446,15 +443,10 @@
       lbl.setStyle("font-weight:bold;")
       myRow.appendChild( lbl )
     }
-
     tableRows.appendChild( myRow )
   }
+  // sqlTextBox.setValue( queryString );
 
-  sqlTextBox.setValue( queryString );
  ]]>
-</zscript>
-<zscript language="Scala">
-
-
 </zscript>
 </window>

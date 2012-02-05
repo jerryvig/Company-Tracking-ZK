@@ -277,12 +277,19 @@
  </tabpanels>
 </tabbox>
 <splitter id="s1" collapse="before"/>
-<div style="font-weight:bold;">
-<grid> 
- <auxhead>
-  <auxheader colspan="1" label="SecondMarket Fundraising Data"/>
- </auxhead>
- <columns id="gridColumns" sizable="true">
+<tabbox>
+ <tabs>
+  <tab label="VC Deals" style="font-weight:bold;"/>
+  <tab label="IPOs" style="font-weight:bold;"/>
+ </tabs>
+ <tabpanels>
+ <tabpanel> 
+ <div style="font-weight:bold;">
+ <grid> 
+  <auxhead>
+   <auxheader colspan="1" label="SecondMarket Fundraising Data"/>
+  </auxhead>
+  <columns id="gridColumns" sizable="true">
     <column sort="auto"><label value="Company Name" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="City" style="font-weight:bold;"/></column>
     <column sort="auto"><label value="State" style="font-weight:bold;"/></column>
@@ -294,8 +301,14 @@
     <column align="right" sort="auto"><label value="1-Yr Web Visitor Growth" style="font-weight:bold;"/></column>
   </columns>
   <rows id="tableRows"></rows>
-</grid>
-</div>
+ </grid>
+ </div>
+ </tabpanel>
+ <tabpanel>
+   <label value="IPOs grid goes here."/>
+ </tabpanel>
+ </tabpanels>
+</tabbox>
 </vbox>
 <zscript language="Groovy">
  <![CDATA[
