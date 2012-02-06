@@ -1,8 +1,8 @@
-<window title="GridTest" border="normal" width="100%">
+<window title="Revenue Growth Data - Public Companies" border="normal" width="100%">
 <div style="font-weight:bold;">
 <grid> 
   <auxhead>
-   <auxheader colspan="1" label="Morningstar Revenue Data"/>
+   <auxheader colspan="3" label="Revenue Growth Data - Public Companies"/>
   </auxhead>
   <columns id="gridColumns" sizable="true">
     <column sort="auto"><label value="Ticker Symbol" style="font-weight:bold;"/></column>
@@ -44,7 +44,7 @@
   DecimalFormat pctFormatter = new DecimalFormat("#,###.00%");
   DecimalFormat doubleFormatter = new DecimalFormat("#,###.##");
 
-  ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, street_address, city, state, zip_code, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees, salary_average, salary_range FROM morningstar_rev_fact_table ORDER BY avg_revenue_growth DESC) WHERE revenue_growth_ttm>=.5");
+  ResultSet rs = stmt.executeQuery("SELECT * FROM (SELECT ticker_symbol, company_name, street_address, city, state, zip_code, sector, industry, revenue_ttm, revenue_growth_ttm, avg_revenue_growth, sharpe_revenue_growth, full_time_employees, salary_average, salary_range FROM morningstar_rev_fact_table ORDER BY sharpe_revenue_growth DESC) WHERE sharpe_revenue_growth>=1.0");
 
   while ( rs.next() ) {
     Row myRow = new Row();
